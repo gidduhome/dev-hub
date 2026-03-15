@@ -1,0 +1,45 @@
+{
+  "model": "claude-opus-4-6",
+  "permissions": {
+    "allow": [
+      "Read:*",
+      "Bash:git:*",
+      "Write:*:*.md",
+      "Write:*:*.py",
+      "Write:*:*.ts",
+      "Write:*:*.tsx",
+      "Write:*:*.css",
+      "Write:*:*.json",
+      "Write:*:*.yaml",
+      "Write:*:*.sql",
+      "Write:*:*.html",
+      "Bash:npm:*",
+      "Bash:npx:*",
+      "Bash:pip:*",
+      "Bash:pytest:*",
+      "Bash:ruff:*",
+      "Bash:alembic:*",
+      "Bash:docker:*",
+      "Bash:docker-compose:*"
+    ],
+    "deny": [
+      "Read:env:*",
+      "Bash:sudo:*",
+      "Bash:rm:-rf:/"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/sec.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
