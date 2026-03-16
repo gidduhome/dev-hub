@@ -1,0 +1,126 @@
+<div class="max-w-6xl mx-auto">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+    <a routerLink="/projects" class="hover:text-accent transition-colors">Projects</a>
+    <span>/</span>
+    @if (project()) {
+      <span class="text-slate-800 font-medium">{{ project()!.name }}</span>
+    } @else {
+      <span class="text-slate-400">Loading…</span>
+    }
+  </nav>
+
+  @if (error()) {
+    <div class="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading() && !project()) {
+    <!-- Loading skeleton -->
+    <div class="space-y-6">
+      <div class="h-10 w-64 bg-slate-200 rounded-lg animate-pulse"></div>
+      <div class="h-12 bg-white rounded-xl border border-slate-200 animate-pulse"></div>
+      <div class="grid grid-cols-3 gap-4">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="h-64 bg-white rounded-xl border border-slate-200 animate-pulse"></div>
+        }
+      </div>
+    </div>
+  } @else if (project()) {
+    <!-- Project header -->
+    <div class="mb-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="font-display font-bold text-2xl text-slate-800">{{ project()!.name }}</h1>
+          @if (project()!.description) {
+            <p class="text-slate-500 mt-1">{{ project()!.description }}</p>
+          }
+        </div>
+        <span class="badge bg-slate-100 text-slate-600 shrink-0 mt-1">
+          {{ project()!.taskCount }} {{ project()!.taskCount === 1 ? 'task' : 'tasks' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Create task form -->
+    <div class="mb-6">
+      <app-create-task-form
+        [projectId]="project()!.id"
+        (taskCreated)="onCreateTask($event)"
+      />
+    </div>
+
+    <!-- Kanban board -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- To Do column -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+          <h2 class="font-semibold text-slate-700 text-sm uppercase tracking-wide">To Do</h2>
+          <span class="ml-auto badge bg-slate-100 text-slate-500">{{ todoTasks().length }}</span>
+        </div>
+        <div class="flex flex-col gap-2 min-h-[120px]">
+          @for (task of todoTasks(); track task.id) {
+            <app-task-card
+              [task]="task"
+              (statusChange)="onStatusChange(task.id, $event)"
+              (deleted)="onDeleteTask(task.id)"
+            />
+          }
+          @if (todoTasks().length === 0) {
+            <div class="flex-1 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center py-8">
+              <p class="text-xs text-slate-400">No tasks</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- In Progress column -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+          <h2 class="font-semibold text-slate-700 text-sm uppercase tracking-wide">In Progress</h2>
+          <span class="ml-auto badge bg-blue-100 text-blue-600">{{ inProgressTasks().length }}</span>
+        </div>
+        <div class="flex flex-col gap-2 min-h-[120px]">
+          @for (task of inProgressTasks(); track task.id) {
+            <app-task-card
+              [task]="task"
+              (statusChange)="onStatusChange(task.id, $event)"
+              (deleted)="onDeleteTask(task.id)"
+            />
+          }
+          @if (inProgressTasks().length === 0) {
+            <div class="flex-1 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center py-8">
+              <p class="text-xs text-slate-400">No tasks</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Done column -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-success"></div>
+          <h2 class="font-semibold text-slate-700 text-sm uppercase tracking-wide">Done</h2>
+          <span class="ml-auto badge bg-green-100 text-green-600">{{ doneTasks().length }}</span>
+        </div>
+        <div class="flex flex-col gap-2 min-h-[120px]">
+          @for (task of doneTasks(); track task.id) {
+            <app-task-card
+              [task]="task"
+              (statusChange)="onStatusChange(task.id, $event)"
+              (deleted)="onDeleteTask(task.id)"
+            />
+          }
+          @if (doneTasks().length === 0) {
+            <div class="flex-1 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center py-8">
+              <p class="text-xs text-slate-400">No tasks</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

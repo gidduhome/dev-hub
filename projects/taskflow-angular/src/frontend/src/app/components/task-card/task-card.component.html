@@ -1,0 +1,31 @@
+<div class="bg-white rounded-lg border border-slate-200 p-4 flex flex-col gap-2 shadow-sm hover:shadow-md transition-shadow">
+  <div class="flex items-start justify-between gap-2">
+    <h4 class="text-sm font-medium text-slate-800 leading-snug flex-1">{{ task.title }}</h4>
+    <button
+      (click)="deleted.emit()"
+      class="shrink-0 p-1 rounded text-slate-400 hover:text-danger hover:bg-red-50 transition-colors"
+      title="Delete task"
+      type="button"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  @if (task.description) {
+    <p class="text-xs text-slate-500 line-clamp-2">{{ task.description }}</p>
+  }
+
+  <div class="flex items-center gap-2 flex-wrap mt-1">
+    <button
+      (click)="cycleStatus()"
+      type="button"
+      class="cursor-pointer transition-opacity hover:opacity-75"
+      title="Click to advance status"
+    >
+      <app-status-badge [status]="task.status" />
+    </button>
+    <app-priority-badge [priority]="task.priority" />
+  </div>
+</div>

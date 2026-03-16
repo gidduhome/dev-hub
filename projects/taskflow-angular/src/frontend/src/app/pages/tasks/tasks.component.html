@@ -1,0 +1,116 @@
+<div class="max-w-5xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="font-display font-bold text-2xl text-slate-800">Tasks</h1>
+    <p class="text-slate-500 text-sm mt-1">Browse and filter all tasks across projects.</p>
+  </div>
+
+  <!-- Filters -->
+  <form [formGroup]="filterForm" class="flex flex-col sm:flex-row gap-3 mb-6">
+    <!-- Search -->
+    <div class="relative flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        type="text"
+        formControlName="search"
+        class="input pl-9"
+        placeholder="Search tasks…"
+        autocomplete="off"
+      />
+    </div>
+
+    <!-- Status filter -->
+    <select formControlName="status" class="input w-auto min-w-[140px]">
+      <option value="">All Statuses</option>
+      <option value="TODO">To Do</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="DONE">Done</option>
+    </select>
+
+    <!-- Priority filter -->
+    <select formControlName="priority" class="input w-auto min-w-[140px]">
+      <option value="">All Priorities</option>
+      <option value="LOW">Low</option>
+      <option value="MEDIUM">Medium</option>
+      <option value="HIGH">High</option>
+    </select>
+
+    @if (hasActiveFilters) {
+      <button type="button" (click)="clearFilters()" class="btn-ghost shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        Clear
+      </button>
+    }
+  </form>
+
+  @if (error()) {
+    <div class="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Results count -->
+  @if (!loading()) {
+    <p class="text-sm text-slate-500 mb-4">
+      {{ total() }} {{ total() === 1 ? 'task' : 'tasks' }} found
+    </p>
+  }
+
+  @if (loading()) {
+    <!-- Skeleton list -->
+    <div class="flex flex-col gap-3">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="h-16 bg-white rounded-xl border border-slate-200 animate-pulse"></div>
+      }
+    </div>
+  } @else if (tasks().length === 0) {
+    <div class="card text-center py-16">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+      @if (hasActiveFilters) {
+        <p class="text-slate-500 font-medium">No tasks match your filters</p>
+        <p class="text-slate-400 text-sm mt-1">Try adjusting or clearing the filters above.</p>
+        <button type="button" (click)="clearFilters()" class="btn-ghost mt-4">Clear Filters</button>
+      } @else {
+        <p class="text-slate-500 font-medium">No tasks yet</p>
+        <p class="text-slate-400 text-sm mt-1">Create a project and add tasks to get started.</p>
+        <a routerLink="/projects" class="btn-primary inline-flex mt-4">Go to Projects</a>
+      }
+    </div>
+  } @else {
+    <!-- Task list -->
+    <div class="flex flex-col gap-2">
+      @for (task of tasks(); track task.id) {
+        <div class="bg-white rounded-xl border border-slate-200 px-5 py-4 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all">
+          <!-- Title -->
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-slate-800 truncate">{{ task.title }}</p>
+            @if (task.description) {
+              <p class="text-xs text-slate-500 truncate mt-0.5">{{ task.description }}</p>
+            }
+          </div>
+
+          <!-- Badges -->
+          <div class="flex items-center gap-2 shrink-0">
+            <app-status-badge [status]="task.status" />
+            <app-priority-badge [priority]="task.priority" />
+          </div>
+
+          <!-- Project link -->
+          <a
+            [routerLink]="['/projects', task.projectId]"
+            class="shrink-0 text-xs text-slate-400 hover:text-accent transition-colors whitespace-nowrap"
+            title="Go to project"
+          >
+            Project #{{ task.projectId }}
+          </a>
+        </div>
+      }
+    </div>
+  }
+</div>
