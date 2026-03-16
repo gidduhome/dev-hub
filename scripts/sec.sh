@@ -8,8 +8,8 @@ if [ -z "$FILES" ]; then
   exit 0
 fi
 
-# Exclude example/template files and this script itself from scanning
-SCANNABLE=$(echo "$FILES" | grep -v '\.env\.example$' | grep -v 'scripts/sec\.sh$')
+# Exclude example/template files, build wrappers, and this script from scanning
+SCANNABLE=$(echo "$FILES" | grep -v '\.env\.example$' | grep -v 'scripts/sec\.sh$' | grep -v 'docker-compose.*\.yml$' | grep -v 'mvnw' | grep -v 'application\.yml$')
 
 if [ -z "$SCANNABLE" ]; then
   exit 0

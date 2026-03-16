@@ -1,14 +1,17 @@
 ---
-name: testing-patterns
-description: Pytest and Vitest testing patterns for TaskFlow
-allowed tools: Read, Grep, Glob
+name: testing
+description: Testing patterns for TaskFlow projects (Pytest, Vitest, JUnit, Jasmine)
 ---
 
 # Testing Patterns
 
 Use **Arrange → Act → Assert** everywhere.
 
-## Pytest (Backend)
+---
+
+## TaskFlow (FastAPI + React)
+
+### Pytest (Backend)
 ```python
 async def test_create_task(async_client, db_session):
     # Arrange
@@ -23,7 +26,7 @@ async def test_create_task(async_client, db_session):
 - `pytest.mark.asyncio` for async tests
 - Mock external services, never call real ones
 
-## Vitest (Frontend)
+### Vitest (Frontend)
 ```typescript
 describe('TaskCard', () => {
   it('shows task title', () => {
@@ -35,3 +38,71 @@ describe('TaskCard', () => {
 ```
 - Co-locate tests: `Component.test.tsx` beside `Component.tsx`
 - Mock API with `msw`
+
+---
+
+## TaskFlow Angular (Spring Boot + Angular)
+
+### JUnit 5 + Testcontainers (Backend)
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Testcontainers
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class ProjectControllerTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:16-alpine")
+                    .withDatabaseName("taskflow_test")
+                    .withUsername("taskflow")
+                    .withPassword("taskflow");
+
+    @DynamicPropertySource
+    static void configureDataSource(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url",      postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
+
+    @Test
+    @Order(1)
+    void createProject_validRequest_returns201() {
+        // Arrange
+        String body = """
+                { "name": "Test Project", "description": "desc" }
+                """;
+        // Act
+        ResponseEntity<String> response = rest.postForEntity(
+                url("/api/v1/projects"),
+                new HttpEntity<>(body, jsonHeaders()), String.class);
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+}
+```
+- Real PostgreSQL via Testcontainers (Docker must be running)
+- `TestRestTemplate` for HTTP assertions
+- Ordered tests for CRUD lifecycle flows
+- Run with: `cd src/api && ./mvnw test`
+
+### Jasmine + Karma (Frontend)
+```typescript
+describe('ProjectService', () => {
+  let service: ProjectService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule]
+    });
+    service = TestBed.inject(ProjectService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});
+```
+- Co-locate tests: `component.spec.ts` beside `component.ts`
+- Use `HttpClientTestingModule` to mock HTTP
+- Run with: `cd src/frontend && npm test`
